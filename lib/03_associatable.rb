@@ -21,25 +21,26 @@ end
 class BelongsToOptions < AssocOptions
   def initialize(name, options = {})
     defaults = {
-      foreign_key: (name.to_s + 'Id').underscore.to_sym,
+      foreign_key: "#{name.to_s}Id".underscore.to_sym,
       primary_key: :id,
       class_name: name.to_s.camelcase
     }
 
     options = defaults.merge(options)
-    options.each {|key, value| send((key.to_s + '=').to_sym, value)}
+    options.each {|key, value| send("#{key}=".to_sym, value)}
   end
 end
 
 class HasManyOptions < AssocOptions
   def initialize(name, self_class_name, options = {})
     defaults = {
-      foreign_key: (self_class_name.to_s + 'Id').underscore.to_sym,
+      foreign_key: "#{self_class_name}Id".underscore.to_sym,
       primary_key: :id,
       class_name: name.to_s.singularize.camelcase
     }
+
     options = defaults.merge(options)
-    options.each {|key, value| send((key.to_s + '=').to_sym, value)}
+    options.each {|key, value| send("#{key}=".to_sym, value)}
   end
 end
 
@@ -70,7 +71,6 @@ module Associatable
 
   def assoc_options
     @assoc_options ||= {}
-    @assoc_options
   end
 end
 

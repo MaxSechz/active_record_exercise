@@ -81,10 +81,10 @@ class SQLObject
   end
 
   def insert
-    col_names = self.class.columns.drop(1).join(',')
-    attributes = attribute_values.drop(1)
-    question_marks = Array.new(attributes.length) {"?"}.join(',')
-    DBConnection.execute(<<-SQL, *attributes)
+    col_names = self.class.columns.join(',')
+    question_marks = Array.new(attribute_values.length) {"?"}.join(',')
+
+    DBConnection.execute(<<-SQL, *attribute_values)
       INSERT INTO
         #{self.class.table_name} (#{col_names})
       VALUES
@@ -92,13 +92,12 @@ class SQLObject
     SQL
 
     self.id = DBConnection.last_insert_row_id
-
   end
 
   def update
-    col_names = self.class.columns.drop(1).map{ |col| col.to_s + ' = ?'}.join(',')
-    attributes = attribute_values.drop(1)
-    DBConnection.execute(<<-SQL, *attributes, self.id)
+    col_names = self.class.columns.map{ |col| "#{col} = ?"}.join(',')
+
+    DBConnection.execute(<<-SQL, *attribute_values, self.id)
       UPDATE
         #{self.class.table_name}
       SET
