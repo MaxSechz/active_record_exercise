@@ -30,8 +30,8 @@ class Relation
 
   def inspect
     result = execute
-    result.inspect
     super
+    print result
   end
 
   def execute(&block)
