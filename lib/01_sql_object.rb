@@ -66,8 +66,9 @@ class SQLObject
   end
 
   def initialize(params = {})
+    self.class.columns.each {|column| send("#{column}=".to_sym, nil)}
     params.each do |attr_name, value|
-      raise "unknown attribute '#{attr_name}'" unless self.class.columns.include?(attr_name.to_sym)
+      raise "unknown attribute '#{attr_name}'" unless attributes.include?(attr_name.to_sym)
       send("#{attr_name}=".to_sym, value)
     end
   end
@@ -77,11 +78,15 @@ class SQLObject
   end
 
   def attribute_values
-    values = self.class.columns.map { |column| send(column)}
+    attributes.values
+  end
+
+  def attribute_names
+    attributes.keys
   end
 
   def insert
-    col_names = self.class.columns.join(',')
+    col_names = attribute_names.join(',')
     question_marks = Array.new(attribute_values.length) {"?"}.join(',')
 
     DBConnection.execute(<<-SQL, *attribute_values)
@@ -95,7 +100,7 @@ class SQLObject
   end
 
   def update
-    col_names = self.class.columns.map{ |col| "#{col} = ?"}.join(',')
+    col_names = attribute_names.map{ |col| "#{col} = ?"}.join(',')
 
     DBConnection.execute(<<-SQL, *attribute_values, self.id)
       UPDATE
